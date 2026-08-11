@@ -116,7 +116,7 @@ export default function DashboardExplorePage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
-  
+
   // Infinite scroll pagination states
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -262,38 +262,90 @@ export default function DashboardExplorePage() {
       </div>
 
       {/* Category Filter Pills — Horizontal Scroll */}
-      <div className="relative group">
-        <div
-          ref={categoryScrollRef}
-          onWheel={handleCategoryWheel}
-          className="flex items-center gap-2 overflow-x-auto flex-nowrap scrollbar-none py-1 px-0.5 touch-pan-x"
-        >
-          <button
-            onClick={() => setSelectedCategory('')}
-            className={`px-4 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all shrink-0 ${
-              selectedCategory === ''
-                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30 scale-[1.02]'
-                : 'av-card text-slate-400 hover:text-slate-200 border border-slate-800/80'
-            }`}
-          >
-            All Categories
-          </button>
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id.toString())}
-              className={`px-4 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 ${
-                selectedCategory === cat.id.toString()
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30 scale-[1.02]'
-                  : 'av-card text-slate-400 hover:text-slate-200 border border-slate-800/80'
-              }`}
-            >
-              <FiTag className="w-3 h-3" />
-              <span>{cat.name}</span>
-            </button>
-          ))}
-        </div>
-      </div>
+     <div className="relative group">
+  {/* Left Scroll Button */}
+  <button
+    type="button"
+    onClick={() => {
+      categoryScrollRef.current?.scrollBy({
+        left: -250,
+        behavior: "smooth",
+      });
+    }}
+    className="absolute left-0 top-1/2 -translate-y-1/2 z-10
+               w-8 h-8 rounded-full
+               bg-slate-900/90 border border-slate-700
+               text-white flex items-center justify-center
+               opacity-0 group-hover:opacity-100
+               transition-opacity shadow-lg"
+    aria-label="Scroll categories left"
+  >
+    ‹
+  </button>
+
+  {/* Categories */}
+  <div
+    ref={categoryScrollRef}
+    onWheel={handleCategoryWheel}
+    className="
+      flex items-center gap-2
+      overflow-x-auto
+      flex-nowrap
+      scrollbar-none
+      py-1 px-9
+      touch-pan-x
+      scroll-smooth
+    "
+  >
+    <button
+      onClick={() => setSelectedCategory("")}
+      className={`px-4 py-1.5 rounded-xl text-xs font-semibold
+        whitespace-nowrap transition-all shrink-0 ${
+          selectedCategory === ""
+            ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30 scale-[1.02]"
+            : "av-card text-slate-400 hover:text-slate-200 border border-slate-800/80"
+        }`}
+    >
+      All Categories
+    </button>
+
+    {categories.map((cat) => (
+      <button
+        key={cat.id}
+        onClick={() => setSelectedCategory(cat.id.toString())}
+        className={`px-4 py-1.5 rounded-xl text-xs font-semibold
+          whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 ${
+            selectedCategory === cat.id.toString()
+              ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30 scale-[1.02]"
+              : "av-card text-slate-400 hover:text-slate-200 border border-slate-800/80"
+          }`}
+      >
+        <FiTag className="w-3 h-3" />
+        <span>{cat.name}</span>
+      </button>
+    ))}
+  </div>
+
+  {/* Right Scroll Button */}
+  <button
+    type="button"
+    onClick={() => {
+      categoryScrollRef.current?.scrollBy({
+        left: 250,
+        behavior: "smooth",
+      });
+    }}
+    className="absolute right-0 top-1/2 -translate-y-1/2 z-10
+               w-8 h-8 rounded-full
+               bg-slate-900/90 border border-slate-700
+               text-white flex items-center justify-center
+               opacity-0 group-hover:opacity-100
+               transition-opacity shadow-lg"
+    aria-label="Scroll categories right"
+  >
+    ›
+  </button>
+</div>
 
       {/* Posts Feed */}
       {loadingInitial ? (
