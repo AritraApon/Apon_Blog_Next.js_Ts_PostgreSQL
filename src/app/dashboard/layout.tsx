@@ -13,6 +13,7 @@ import {
 } from 'react-icons/fi';
 import { HiSparkles } from 'react-icons/hi2';
 import { useAuth } from '@/lib/authContext';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const navItems = [
   { name: 'Explore', href: '/dashboard', icon: FiCompass },
@@ -34,7 +35,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-100">
+      <div className="min-h-screen flex items-center justify-center av-bg av-text">
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
           <p className="text-slate-400 text-sm font-medium">Loading Dashboard...</p>
@@ -48,20 +49,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-slate-950 text-slate-100">
+    <div className="min-h-screen flex flex-col md:flex-row av-bg av-text">
       {/* Desktop Sidebar Navigation */}
-      <aside className="hidden md:flex flex-col w-64 bg-slate-900 border-r border-slate-800 p-5 sticky top-0 h-screen justify-between z-30">
+      <aside className="hidden md:flex flex-col w-64 av-nav border-r border-slate-800/60 p-5 sticky top-0 h-screen justify-between z-30">
         <div>
           {/* App Brand Header */}
-          <Link href="/dashboard" className="flex items-center gap-2.5 px-3 py-2 mb-8 group">
-            <span className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/30 group-hover:shadow-indigo-600/50 transition-shadow">
-              <HiSparkles className="w-5 h-5 text-white" />
-            </span>
-            <div>
-              <h1 className="font-bold text-base text-white leading-tight tracking-tight">AponVerse</h1>
-              <span className="text-[11px] text-slate-500 font-medium">Blog Platform</span>
-            </div>
-          </Link>
+          <div className="flex items-center justify-between mb-8">
+            <Link href="/dashboard" className="flex items-center gap-2.5 group">
+              <span className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/30 group-hover:shadow-indigo-600/50 transition-shadow">
+                <HiSparkles className="w-5 h-5 text-white" />
+              </span>
+              <div>
+                <h1 className="font-bold text-base av-text leading-tight tracking-tight">AponVerse</h1>
+                <span className="text-[11px] text-slate-500 font-medium">Blog Platform</span>
+              </div>
+            </Link>
+            <ThemeToggle />
+          </div>
 
           {/* Navigation Links */}
           <nav className="space-y-1">
@@ -83,8 +87,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <div
                     className={`flex items-center gap-3.5 px-4 py-3 rounded-lg text-sm font-medium transition-colors relative z-10 ${
                       isActive
-                        ? 'text-indigo-400'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                        ? 'text-indigo-500 font-semibold'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/30'
                     }`}
                   >
                     <Icon className="w-5 h-5" />
@@ -97,7 +101,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         {/* User Info & Logout Button */}
-        <div className="pt-4 border-t border-slate-800">
+        <div className="pt-4 border-t border-slate-800/60">
           <div className="flex items-center gap-3 px-3 py-2 mb-3">
             {user.avatar ? (
               <img src={user.avatar} alt={user.name || 'Avatar'} className="w-10 h-10 rounded-full object-cover border-2 border-slate-700 shadow-md" />
@@ -107,7 +111,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
             )}
             <div className="overflow-hidden">
-              <p className="text-sm font-semibold text-white truncate">{user.name || 'User'}</p>
+              <p className="text-sm font-semibold av-text truncate">{user.name || 'User'}</p>
               <p className="text-xs text-slate-400 truncate">{user.email}</p>
             </div>
           </div>
@@ -126,14 +130,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* Mobile Top Bar */}
-      <header className="flex md:hidden items-center justify-between px-5 py-4 bg-slate-900 border-b border-slate-800 sticky top-0 z-40">
+      <header className="flex md:hidden items-center justify-between px-5 py-4 av-nav border-b border-slate-800/60 sticky top-0 z-40">
         <Link href="/dashboard" className="flex items-center gap-2">
           <span className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shadow-md shadow-indigo-600/30">
             <HiSparkles className="w-4 h-4 text-white" />
           </span>
-          <span className="font-bold text-base text-white tracking-tight">AponVerse</span>
+          <span className="font-bold text-base av-text tracking-tight">AponVerse</span>
         </Link>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
           {user.avatar ? (
             <img src={user.avatar} alt={user.name || 'Avatar'} className="w-8 h-8 rounded-full object-cover border border-slate-700" />
           ) : (
@@ -160,7 +165,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </main>
 
       {/* Mobile Bottom Navigation Bar */}
-      <nav className="flex md:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 px-3 py-2 justify-around items-center">
+      <nav className="flex md:hidden fixed bottom-0 left-0 right-0 z-50 av-nav border-t border-slate-800/60 px-3 py-2 justify-around items-center backdrop-blur-md">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive =
@@ -172,7 +177,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               key={item.href}
               href={item.href}
               className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors relative ${
-                isActive ? 'text-indigo-400' : 'text-slate-400 hover:text-slate-200'
+                isActive ? 'text-indigo-500 font-semibold' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               <Icon className="w-5 h-5" />
@@ -180,7 +185,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               {isActive && (
                 <motion.div
                   layoutId="mobileActiveDot"
-                  className="w-1 h-1 bg-indigo-400 rounded-full absolute -bottom-1"
+                  className="w-1 h-1 bg-indigo-500 rounded-full absolute -bottom-1"
                   transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                 />
               )}

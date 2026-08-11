@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiFileText,
@@ -13,18 +13,27 @@ import {
   FiEye,
   FiImage,
   FiUploadCloud,
+  FiChevronLeft,
+  FiChevronRight,
 } from 'react-icons/fi';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { Post, Category } from '@/lib/types';
 import { getMyPosts, updatePost, deletePost } from '@/actions/postAction';
 import { getCategories } from '@/actions/categoryAction';
 import { uploadImageToImgBB } from '@/lib/api';
 
+const PAGE_LIMIT = 6;
+
 export default function MyPostsPage() {
+  const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalPosts, setTotalPosts] = useState(0);
 
   // Edit Modal state
   const [editingPost, setEditingPost] = useState<Post | null>(null);
@@ -43,22 +52,30 @@ export default function MyPostsPage() {
   const [deletingPost, setDeletingPost] = useState<Post | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const loadMyPosts = async () => {
+  const loadMyPostsPage = useCallback(async (pageToLoad: number) => {
     setLoading(true);
     try {
-      const data = await getMyPosts();
-      setPosts(data);
+      const res = await getMyPosts(pageToLoad, PAGE_LIMIT);
+      setPosts(res.posts || []);
+      setTotalPages(res.totalPages || 1);
+      setTotalPosts(res.total || 0);
+      setCurrentPage(pageToLoad);
     } catch {
-      // toast error handled in action
+      setPosts([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    loadMyPosts();
+    loadMyPostsPage(1);
     getCategories().then(setCategories).catch(() => {});
-  }, []);
+  }, [loadMyPostsPage]);
+
+  const handlePageChange = (targetPage: number) => {
+    if (targetPage < 1 || targetPage > totalPages) return;
+    loadMyPostsPage(targetPage);
+  };
 
   const openEditModal = (post: Post) => {
     setEditingPost(post);
@@ -128,9 +145,9 @@ export default function MyPostsPage() {
 
       await updatePost(editingPost.id, payload);
       closeEditModal();
-      loadMyPosts();
+      loadMyPostsPage(currentPage);
     } catch {
-      // handled
+      // handled in action toast
     } finally {
       setIsUpdating(false);
     }
@@ -143,10 +160,15 @@ export default function MyPostsPage() {
       const ok = await deletePost(deletingPost.id);
       if (ok) {
         setDeletingPost(null);
-        loadMyPosts();
+        // If deleting the last post on the current page (and not page 1), move to page - 1
+        if (posts.length === 1 && currentPage > 1) {
+          loadMyPostsPage(currentPage - 1);
+        } else {
+          loadMyPostsPage(currentPage);
+        }
       }
     } catch {
-      // handled
+      // handled in action toast
     } finally {
       setIsDeleting(false);
     }
@@ -157,17 +179,19 @@ export default function MyPostsPage() {
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 rounded-2xl p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 av-card border border-slate-800/80 rounded-2xl p-6 shadow-sm">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <FiFileText className="w-6 h-6 text-indigo-400" />
-            <span>My Posts</span>
+          <h1 className="text-2xl font-bold av-text flex items-center gap-2">
+            <FiFileText className="w-6 h-6 text-indigo-500" />
+            <span>My Authored Posts</span>
           </h1>
-          <p className="text-sm text-slate-400 mt-1">Manage and edit your published articles</p>
+          <p className="text-sm text-slate-400 mt-1">
+            Manage and edit your published articles {totalPosts > 0 ? `(${totalPosts} total)` : ''}
+          </p>
         </div>
         <Link
           href="/dashboard/create"
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl transition-all self-start sm:self-auto"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl transition-all self-start sm:self-auto shadow-md shadow-indigo-600/20"
         >
           <FiPlusCircle className="w-4 h-4" />
           <span>New Post</span>
@@ -177,20 +201,22 @@ export default function MyPostsPage() {
       {/* Posts List */}
       {loading ? (
         <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-28 bg-slate-900 border border-slate-800 rounded-2xl animate-pulse" />
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-24 av-card border border-slate-800/80 rounded-2xl animate-pulse" />
           ))}
         </div>
       ) : posts.length === 0 ? (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center flex flex-col items-center justify-center">
-          <div className="w-14 h-14 bg-slate-800 text-slate-500 rounded-2xl flex items-center justify-center mb-3">
+        <div className="av-card border border-slate-800/80 rounded-2xl p-12 text-center flex flex-col items-center justify-center shadow-sm">
+          <div className="w-14 h-14 bg-slate-800/40 text-slate-500 rounded-2xl flex items-center justify-center mb-3">
             <FiFileText className="w-7 h-7" />
           </div>
-          <h3 className="text-base font-semibold text-white mb-1">No Posts Created Yet</h3>
-          <p className="text-xs text-slate-400 mb-5">You haven't authored any blog posts so far.</p>
+          <h3 className="text-base font-semibold av-text mb-1">No Posts Found</h3>
+          <p className="text-xs text-slate-400 mb-5">
+            {currentPage > 1 ? "No posts on this page." : "You haven't authored any blog posts so far."}
+          </p>
           <Link
             href="/dashboard/create"
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl transition-colors"
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl transition-colors shadow-md"
           >
             Create Your First Post
           </Link>
@@ -202,17 +228,18 @@ export default function MyPostsPage() {
               key={post.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-slate-700 transition-all"
+              onClick={() => router.push(`/dashboard/posts/${post.id}`)}
+              className="av-card border border-slate-800/80 rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-indigo-500/40 transition-all cursor-pointer shadow-sm group"
             >
-              <div className="flex items-center gap-4 flex-1">
+              <div className="flex items-center gap-4 flex-1 min-w-0">
                 {post.image ? (
                   <img
                     src={post.image}
                     alt={post.title}
-                    className="w-16 h-16 object-cover rounded-xl border border-slate-800 hidden sm:block flex-shrink-0"
+                    className="w-16 h-16 object-cover rounded-xl border border-slate-700/60 hidden sm:block shrink-0 group-hover:scale-105 transition-transform"
                   />
                 ) : (
-                  <div className="w-16 h-16 rounded-xl border border-slate-800 bg-slate-950 hidden sm:flex items-center justify-center text-slate-700 flex-shrink-0">
+                  <div className="w-16 h-16 rounded-xl border border-slate-700/60 bg-slate-950/20 hidden sm:flex items-center justify-center text-slate-500 shrink-0">
                     <FiImage className="w-6 h-6" />
                   </div>
                 )}
@@ -226,29 +253,34 @@ export default function MyPostsPage() {
                       {new Date(post.createdAt || Date.now()).toLocaleDateString()}
                     </span>
                   </div>
-                  <h3 className="text-base font-bold text-white truncate">{post.title}</h3>
+                  <h3 className="text-base font-bold av-text group-hover:text-indigo-500 transition-colors truncate">{post.title}</h3>
                   <p className="text-xs text-slate-400 line-clamp-1">{post.description || post.content}</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 self-end md:self-auto pt-2 md:pt-0 flex-shrink-0">
+              <div
+                className="flex items-center gap-2 self-end md:self-auto pt-2 md:pt-0 shrink-0"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <Link
                   href={`/dashboard/posts/${post.id}`}
-                  className="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-colors"
+                  className="p-2.5 bg-slate-800/40 hover:bg-slate-800 text-slate-300 rounded-xl transition-colors"
                   title="View"
                 >
                   <FiEye className="w-4 h-4" />
                 </Link>
                 <button
+                  type="button"
                   onClick={() => openEditModal(post)}
-                  className="p-2.5 bg-slate-800 hover:bg-indigo-600/20 hover:text-indigo-400 text-slate-300 rounded-xl transition-colors"
+                  className="p-2.5 bg-slate-800/40 hover:bg-indigo-600/20 hover:text-indigo-400 text-slate-300 rounded-xl transition-colors"
                   title="Edit"
                 >
                   <FiEdit className="w-4 h-4" />
                 </button>
                 <button
+                  type="button"
                   onClick={() => setDeletingPost(post)}
-                  className="p-2.5 bg-slate-800 hover:bg-rose-500/20 hover:text-rose-400 text-slate-300 rounded-xl transition-colors"
+                  className="p-2.5 bg-slate-800/40 hover:bg-rose-500/20 hover:text-rose-400 text-slate-300 rounded-xl transition-colors"
                   title="Delete"
                 >
                   <FiTrash2 className="w-4 h-4" />
@@ -256,23 +288,62 @@ export default function MyPostsPage() {
               </div>
             </motion.div>
           ))}
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between pt-4 border-t border-slate-800/60">
+              <button
+                disabled={currentPage <= 1}
+                onClick={() => handlePageChange(currentPage - 1)}
+                className="flex items-center gap-1.5 px-4 py-2 av-card border border-slate-800 rounded-xl text-xs font-semibold text-slate-300 hover:bg-indigo-600/10 hover:text-indigo-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <FiChevronLeft className="w-4 h-4" />
+                <span>Previous</span>
+              </button>
+
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pg) => (
+                  <button
+                    key={pg}
+                    onClick={() => handlePageChange(pg)}
+                    className={`w-8 h-8 rounded-lg text-xs font-semibold transition-all ${
+                      currentPage === pg
+                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                        : 'av-card text-slate-400 hover:text-slate-200 border border-slate-800'
+                    }`}
+                  >
+                    {pg}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                disabled={currentPage >= totalPages}
+                onClick={() => handlePageChange(currentPage + 1)}
+                className="flex items-center gap-1.5 px-4 py-2 av-card border border-slate-800 rounded-xl text-xs font-semibold text-slate-300 hover:bg-indigo-600/10 hover:text-indigo-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <span>Next</span>
+                <FiChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
       )}
 
       {/* EDIT MODAL */}
       <AnimatePresence>
         {editingPost && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm overflow-y-auto">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl my-4"
+              className="av-card border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl my-4"
             >
               {/* Modal Header */}
-              <div className="flex items-center justify-between border-b border-slate-800 px-6 py-4">
-                <h3 className="text-base font-bold text-white">Edit Post</h3>
-                <button onClick={closeEditModal} className="text-slate-400 hover:text-white transition-colors">
+              <div className="flex items-center justify-between border-b border-slate-800/80 px-6 py-4">
+                <h3 className="text-base font-bold av-text">Edit Post</h3>
+                <button onClick={closeEditModal} className="text-slate-400 hover:text-slate-200 transition-colors">
                   <FiX className="w-5 h-5" />
                 </button>
               </div>
@@ -286,7 +357,7 @@ export default function MyPostsPage() {
                     required
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3.5 py-2.5 av-input border border-slate-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
 
@@ -297,7 +368,7 @@ export default function MyPostsPage() {
                     <select
                       value={editCategory}
                       onChange={(e) => setEditCategory(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
+                      className="w-full px-3.5 py-2.5 av-input border border-slate-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
                     >
                       <option value="">Select Category</option>
                       {categories.map((c) => (
@@ -311,7 +382,7 @@ export default function MyPostsPage() {
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1.5">Featured Image</label>
                   {currentEditImage ? (
-                    <div className="relative rounded-xl overflow-hidden border border-slate-700 bg-slate-950 h-40">
+                    <div className="relative rounded-xl overflow-hidden border border-slate-700 h-40">
                       <img src={currentEditImage} alt="Preview" className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                       {editImagePreview && (
@@ -343,7 +414,7 @@ export default function MyPostsPage() {
                       </div>
                     </div>
                   ) : (
-                    <label className="w-full border-2 border-dashed border-slate-800 hover:border-indigo-500/60 rounded-xl h-28 flex flex-col items-center justify-center text-slate-400 hover:text-slate-200 transition-all bg-slate-950/40 group cursor-pointer">
+                    <label className="w-full border-2 border-dashed border-slate-800 hover:border-indigo-500/60 rounded-xl h-28 flex flex-col items-center justify-center text-slate-400 hover:text-slate-200 transition-all bg-slate-950/20 group cursor-pointer">
                       <FiUploadCloud className="w-5 h-5 mb-1 group-hover:text-indigo-400" />
                       <span className="text-xs font-semibold">Click to upload image</span>
                       <span className="text-[11px] text-slate-500">PNG, JPG, WEBP · Max 5MB</span>
@@ -360,12 +431,12 @@ export default function MyPostsPage() {
                     rows={5}
                     value={editDescription}
                     onChange={(e) => setEditDescription(e.target.value)}
-                    className="w-full p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                    className="w-full p-3.5 av-input border border-slate-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
                   />
                 </div>
 
                 {/* Actions */}
-                <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
+                <div className="flex justify-end gap-2 pt-2 border-t border-slate-800/80">
                   <button
                     type="button"
                     onClick={closeEditModal}
@@ -393,19 +464,19 @@ export default function MyPostsPage() {
       {/* DELETE CONFIRMATION MODAL */}
       <AnimatePresence>
         {deletingPost && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4 text-center"
+              className="av-card border border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4 text-center"
             >
               <div className="w-12 h-12 bg-rose-500/20 text-rose-400 rounded-full flex items-center justify-center mx-auto">
                 <FiAlertTriangle className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-white">Delete Post?</h3>
+              <h3 className="text-lg font-bold av-text">Delete Post?</h3>
               <p className="text-xs text-slate-400">
-                Are you sure you want to delete <span className="text-white font-semibold">"{deletingPost.title}"</span>? This action cannot be undone.
+                Are you sure you want to delete <span className="av-text font-semibold">&quot;{deletingPost.title}&quot;</span>? This action cannot be undone.
               </p>
               <div className="flex justify-center gap-3 pt-2">
                 <button

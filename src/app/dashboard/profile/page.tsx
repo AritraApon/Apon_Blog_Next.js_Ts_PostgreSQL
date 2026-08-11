@@ -30,8 +30,8 @@ export default function ProfilePage() {
       setName(user.name || '');
       setBio(user.bio || '');
     }
-    getMyPosts()
-      .then((posts) => setPostCount(posts.length))
+    getMyPosts(1, 100)
+      .then((res) => setPostCount(res.total || res.posts?.length || 0))
       .catch(() => {});
   }, [user]);
 
@@ -61,7 +61,6 @@ export default function ProfilePage() {
     try {
       let avatarUrl: string | undefined = undefined;
 
-      // Upload avatar to ImgBB if a new file was selected
       if (avatarFile) {
         setIsUploadingAvatar(true);
         toast.info('Uploading profile photo...');
@@ -80,7 +79,6 @@ export default function ProfilePage() {
 
       await updateMe(payload);
 
-      // Cleanup preview
       if (avatarPreview) URL.revokeObjectURL(avatarPreview);
       setAvatarFile(null);
       setAvatarPreview(null);
@@ -118,7 +116,7 @@ export default function ProfilePage() {
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl overflow-hidden"
+        className="av-card border border-slate-800/80 rounded-2xl shadow-xl overflow-hidden"
       >
         {/* Cover Banner */}
         <div className="h-24 bg-gradient-to-r from-indigo-950 via-violet-950 to-slate-900" />
@@ -148,7 +146,7 @@ export default function ProfilePage() {
 
             <button
               onClick={() => setIsEditing(!isEditing)}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl transition-colors flex items-center gap-2 self-start sm:self-auto"
+              className="px-4 py-2 bg-slate-800/50 hover:bg-slate-800 text-slate-200 text-xs font-semibold rounded-xl transition-colors flex items-center gap-2 self-start sm:self-auto"
             >
               <FiEdit className="w-3.5 h-3.5" />
               <span>{isEditing ? 'Cancel Edit' : 'Edit Profile'}</span>
@@ -157,7 +155,7 @@ export default function ProfilePage() {
 
           {/* Info */}
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold text-white">{user.name || 'User Profile'}</h1>
+            <h1 className="text-2xl font-bold av-text">{user.name || 'User Profile'}</h1>
             <p className="text-xs text-slate-400 flex items-center gap-1.5">
               <FiMail className="w-3.5 h-3.5" />
               <span>{user.email}</span>
@@ -174,10 +172,10 @@ export default function ProfilePage() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl overflow-hidden"
+            className="av-card border border-slate-800/80 rounded-2xl shadow-xl overflow-hidden"
           >
             <div className="p-6">
-              <h3 className="text-base font-bold text-white border-b border-slate-800 pb-4 mb-5">
+              <h3 className="text-base font-bold av-text border-b border-slate-800/60 pb-4 mb-5">
                 Update Profile Information
               </h3>
 
@@ -188,7 +186,6 @@ export default function ProfilePage() {
                     Profile Photo
                   </label>
                   <div className="flex items-center gap-4">
-                    {/* Current/Preview avatar */}
                     {displayAvatar ? (
                       <img
                         src={displayAvatar}
@@ -200,7 +197,7 @@ export default function ProfilePage() {
                         {initials}
                       </div>
                     )}
-                    <label className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl cursor-pointer transition-colors border border-slate-700">
+                    <label className="flex items-center gap-2 px-4 py-2.5 bg-slate-800/50 hover:bg-slate-800 text-slate-200 text-xs font-semibold rounded-xl cursor-pointer transition-colors border border-slate-700">
                       <FiCamera className="w-3.5 h-3.5" />
                       <span>{avatarFile ? 'Change Photo' : 'Upload Photo'}</span>
                       <input
@@ -229,7 +226,7 @@ export default function ProfilePage() {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-4 py-2.5 av-input border border-slate-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
 
@@ -243,7 +240,7 @@ export default function ProfilePage() {
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
                     placeholder="Share a short bio about yourself..."
-                    className="w-full p-4 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                    className="w-full p-4 av-input border border-slate-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
                   />
                 </div>
 
@@ -251,7 +248,7 @@ export default function ProfilePage() {
                   <button
                     type="button"
                     onClick={handleCancelEdit}
-                    className="px-4 py-2 bg-slate-800 text-slate-300 text-xs font-semibold rounded-lg flex items-center gap-1"
+                    className="px-4 py-2 bg-slate-800/60 text-slate-300 text-xs font-semibold rounded-lg flex items-center gap-1"
                   >
                     <FiX className="w-4 h-4" />
                     <span>Cancel</span>
@@ -277,31 +274,31 @@ export default function ProfilePage() {
 
       {/* Account Stats & Details */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex items-center gap-4">
-          <div className="p-3 bg-indigo-600/20 text-indigo-400 rounded-xl">
+        <div className="av-card border border-slate-800/80 rounded-2xl p-5 flex items-center gap-4">
+          <div className="p-3 bg-indigo-600/20 text-indigo-500 rounded-xl">
             <FiFileText className="w-6 h-6" />
           </div>
           <div>
             <p className="text-xs text-slate-400 font-medium">Published Articles</p>
-            <p className="text-xl font-bold text-white">{postCount}</p>
+            <p className="text-xl font-bold av-text">{postCount}</p>
           </div>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex items-center gap-4">
-          <div className="p-3 bg-indigo-600/20 text-indigo-400 rounded-xl">
+        <div className="av-card border border-slate-800/80 rounded-2xl p-5 flex items-center gap-4">
+          <div className="p-3 bg-indigo-600/20 text-indigo-500 rounded-xl">
             <FiUser className="w-6 h-6" />
           </div>
           <div>
             <p className="text-xs text-slate-400 font-medium">Account Type</p>
-            <p className="text-xl font-bold text-white">Author / Writer</p>
+            <p className="text-xl font-bold av-text">Author / Writer</p>
           </div>
         </div>
       </div>
 
       {/* Logout Action Card */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="av-card border border-slate-800/80 rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h4 className="text-base font-semibold text-white">Sign Out of Account</h4>
+          <h4 className="text-base font-semibold av-text">Sign Out of Account</h4>
           <p className="text-xs text-slate-400">Log out from your current session on this device</p>
         </div>
         <button

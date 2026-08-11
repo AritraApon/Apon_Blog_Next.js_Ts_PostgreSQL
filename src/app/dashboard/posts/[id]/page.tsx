@@ -100,11 +100,11 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
   if (loading) {
     return (
       <div className="max-w-2xl mx-auto py-12 space-y-6 animate-pulse">
-        <div className="h-60 bg-slate-900 rounded-2xl" />
-        <div className="h-8 bg-slate-900 rounded w-3/4" />
-        <div className="h-4 bg-slate-900 rounded w-1/2" />
+        <div className="h-60 av-card rounded-2xl" />
+        <div className="h-8 av-card rounded w-3/4" />
+        <div className="h-4 av-card rounded w-1/2" />
         <div className="space-y-3">
-          {[1,2,3,4,5].map(i => <div key={i} className="h-4 bg-slate-900 rounded" />)}
+          {[1,2,3,4,5].map(i => <div key={i} className="h-4 av-card rounded" />)}
         </div>
       </div>
     );
@@ -112,8 +112,8 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
 
   if (!post) {
     return (
-      <div className="max-w-2xl mx-auto py-12 text-center bg-slate-900 border border-slate-800 rounded-2xl p-8">
-        <h2 className="text-xl font-bold text-white mb-2">Post Not Found</h2>
+      <div className="max-w-2xl mx-auto py-12 text-center av-card border border-slate-800/80 rounded-2xl p-8">
+        <h2 className="text-xl font-bold av-text mb-2">Post Not Found</h2>
         <p className="text-sm text-slate-400 mb-6">The article you are looking for does not exist or was removed.</p>
         <Link href="/dashboard" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg transition-colors">
           Back to Feed
@@ -143,17 +143,17 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35 }}
-        className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl"
+        className="av-card border border-slate-800/80 rounded-2xl overflow-hidden shadow-xl"
       >
         {/* Hero Image */}
         {post.image && (
-          <div className="w-full aspect-[16/7] overflow-hidden bg-slate-950 relative">
+          <div className="w-full aspect-[16/7] overflow-hidden bg-slate-950/40 relative">
             <img
               src={post.image}
               alt={post.title}
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 to-transparent" />
           </div>
         )}
 
@@ -164,14 +164,14 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
               <FiTag className="w-3 h-3" />
               {categoryName}
             </span>
-            <span className="text-xs text-slate-500 flex items-center gap-1">
+            <span className="text-xs text-slate-400 flex items-center gap-1">
               <FiClock className="w-3 h-3" />
               {readingTime} min read
             </span>
           </div>
 
           {/* Title */}
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white leading-tight tracking-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold av-text leading-tight tracking-tight">
             {post.title}
           </h1>
 
@@ -186,13 +186,13 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
                 </div>
               )}
               <div>
-                <p className="font-semibold text-slate-100 text-sm">{authorName}</p>
+                <p className="font-semibold av-text text-sm">{authorName}</p>
                 {post.author?.email && (
-                  <p className="text-[11px] text-slate-500">{post.author.email}</p>
+                  <p className="text-[11px] text-slate-400">{post.author.email}</p>
                 )}
               </div>
             </div>
-            <span className="text-xs text-slate-500 flex items-center gap-1.5 shrink-0">
+            <span className="text-xs text-slate-400 flex items-center gap-1.5 shrink-0">
               <FiCalendar className="w-3.5 h-3.5" />
               {new Date(post.createdAt || Date.now()).toLocaleDateString('en-US', {
                 year: 'numeric', month: 'long', day: 'numeric',
@@ -201,12 +201,12 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
           </div>
 
           {/* Article Body */}
-          <div className="text-slate-300 text-[15px] leading-[1.85] whitespace-pre-wrap">
+          <div className="av-text text-[15px] leading-[1.85] whitespace-pre-wrap">
             {post.description || post.content}
           </div>
 
           {/* Action Bar */}
-          <div className="pt-6 border-t border-slate-800 flex items-center justify-between">
+          <div className="pt-6 border-t border-slate-800/60 flex items-center justify-between">
             <motion.button
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.97 }}
@@ -215,7 +215,7 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
                 isLiked
                   ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                  : 'bg-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-700 border border-transparent'
+                  : 'bg-slate-800/40 text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-transparent'
               }`}
             >
               <FiHeart className={`w-4 h-4 ${isLiked ? 'fill-rose-400' : ''}`} />
@@ -231,10 +231,10 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
       </motion.article>
 
       {/* Comments Section */}
-      <section className="bg-slate-900 border border-slate-800 rounded-2xl shadow-lg overflow-hidden">
-        <div className="px-6 sm:px-8 pt-6 pb-5 border-b border-slate-800">
-          <h3 className="text-base font-bold text-white flex items-center gap-2">
-            <FiMessageSquare className="w-4.5 h-4.5 text-indigo-400" />
+      <section className="av-card border border-slate-800/80 rounded-2xl shadow-lg overflow-hidden">
+        <div className="px-6 sm:px-8 pt-6 pb-5 border-b border-slate-800/60">
+          <h3 className="text-base font-bold av-text flex items-center gap-2">
+            <FiMessageSquare className="w-4.5 h-4.5 text-indigo-500" />
             <span>Discussion ({comments.length})</span>
           </h3>
         </div>
@@ -256,7 +256,7 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 placeholder="Share your thoughts..."
-                className="flex-1 px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm"
+                className="flex-1 px-4 py-2.5 av-input border border-slate-800 rounded-xl placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-sm"
               />
               <button
                 type="submit"
@@ -275,7 +275,7 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
           {/* Comments List */}
           <div className="space-y-3">
             {comments.length === 0 ? (
-              <p className="text-sm text-slate-500 text-center py-6">
+              <p className="text-sm text-slate-400 text-center py-6">
                 No comments yet. Start the conversation!
               </p>
             ) : (
@@ -290,7 +290,7 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
                 return (
                   <div
                     key={comment.id}
-                    className="flex gap-3 items-start bg-slate-950/60 border border-slate-800/60 rounded-xl p-4"
+                    className="flex gap-3 items-start av-card border border-slate-800/60 rounded-xl p-4"
                   >
                     {/* Avatar */}
                     {commentAvatar ? (
@@ -304,8 +304,8 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-2 text-xs">
-                          <span className="font-semibold text-slate-200">{commentAuthor}</span>
-                          <span className="text-slate-600 flex items-center gap-0.5">
+                          <span className="font-semibold av-text">{commentAuthor}</span>
+                          <span className="text-slate-400 flex items-center gap-0.5">
                             <FiClock className="w-3 h-3" />
                             {new Date(comment.createdAt || Date.now()).toLocaleDateString()}
                           </span>
@@ -313,7 +313,7 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
                         {isOwner && (
                           <button
                             onClick={() => handleDeleteComment(comment.id)}
-                            className="text-slate-600 hover:text-rose-400 p-1 transition-colors shrink-0"
+                            className="text-slate-400 hover:text-rose-400 p-1 transition-colors shrink-0"
                             title="Delete comment"
                           >
                             <FiTrash2 className="w-3.5 h-3.5" />

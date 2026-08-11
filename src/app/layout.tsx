@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from '@/lib/authContext';
+import { ThemeProvider } from '@/lib/themeContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -22,12 +23,20 @@ export const metadata: Metadata = {
   },
 };
 
+// Anti-flash script: runs before React hydrates to apply saved theme
+const themeScript = `(function(){try{var t=localStorage.getItem('av-theme')||'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.className} h-full`}>
-      <body className="min-h-full flex flex-col bg-slate-950 text-slate-100 antialiased">
+    <html lang="en" className={inter.className} data-theme="dark" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
+      <body className="min-h-full flex flex-col av-bg av-text antialiased">
         <AuthProvider>
-          {children}
+          <ThemeProvider>
+            {children}
+          </ThemeProvider>
         </AuthProvider>
         <ToastContainer
           position="top-right"
@@ -38,11 +47,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           pauseOnFocusLoss
           draggable
           pauseOnHover
-          theme="dark"
-          toastStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155' }}
+          theme="colored"
         />
       </body>
     </html>
   );
 }
-

@@ -1,10 +1,11 @@
 import { apiClient } from '../api';
-import { Post, PostsResponse } from '../types';
+import { Post } from '../types';
 import { toast } from 'react-toastify';
+import axios from 'axios';
 
 export const getAllPosts = async (page = 1, limit = 6, search = '') => {
   try {
-    const params: Record<string, any> = { page, limit };
+    const params: Record<string, string | number> = { page, limit };
     if (search.trim()) {
       params.search = search.trim();
     }
@@ -29,8 +30,11 @@ export const getAllPosts = async (page = 1, limit = 6, search = '') => {
       totalPages,
       total,
     };
-  } catch (error: any) {
-    const msg = error.response?.data?.message || 'Failed to fetch posts';
+  } catch (error: unknown) {
+    let msg = 'Failed to fetch posts';
+    if (axios.isAxiosError(error)) {
+      msg = error.response?.data?.message || error.message || msg;
+    }
     toast.error(msg);
     return { posts: [], totalPages: 1, total: 0 };
   }
@@ -41,23 +45,38 @@ export const getPostById = async (id: string | number): Promise<Post | null> => 
     const res = await apiClient.get(`/posts/${id}`);
     const data = res.data;
     return (data.data || data.post || data) as Post;
-  } catch (error: any) {
-    const msg = error.response?.data?.message || 'Failed to fetch post details';
+  } catch (error: unknown) {
+    let msg = 'Failed to fetch post details';
+    if (axios.isAxiosError(error)) {
+      msg = error.response?.data?.message || error.message || msg;
+    }
     toast.error(msg);
     return null;
   }
 };
 
-export const getMyPosts = async (): Promise<Post[]> => {
+export const getMyPosts = async (page = 1, limit = 6): Promise<{ posts: Post[]; totalPages: number; total: number }> => {
   try {
-    const res = await apiClient.get('/posts/my-posts');
+    const res = await apiClient.get('/posts/my-posts', { params: { page, limit } });
     const data = res.data;
-    const posts = Array.isArray(data) ? data : data.data || data.posts || [];
-    return posts as Post[];
-  } catch (error: any) {
-    const msg = error.response?.data?.message || 'Failed to fetch my posts';
+    if (Array.isArray(data)) {
+      const total = data.length;
+      const totalPages = Math.max(1, Math.ceil(total / limit));
+      const start = (page - 1) * limit;
+      const posts = data.slice(start, start + limit) as Post[];
+      return { posts, totalPages, total };
+    }
+    const posts = (data.data || data.posts || []) as Post[];
+    const totalPages = data.pagination?.totalPages || data.totalPages || Math.max(1, Math.ceil((data.total || posts.length) / limit));
+    const total = data.pagination?.total || data.total || posts.length;
+    return { posts, totalPages, total };
+  } catch (error: unknown) {
+    let msg = 'Failed to fetch my posts';
+    if (axios.isAxiosError(error)) {
+      msg = error.response?.data?.message || error.message || msg;
+    }
     toast.error(msg);
-    return [];
+    return { posts: [], totalPages: 1, total: 0 };
   }
 };
 
@@ -70,7 +89,7 @@ export interface CreatePostInput {
 
 export const createPost = async (postData: CreatePostInput): Promise<Post> => {
   try {
-    const body: Record<string, any> = {
+    const body: Record<string, unknown> = {
       title: postData.title,
       description: postData.description,
       categoryId: postData.categoryId,
@@ -85,8 +104,13 @@ export const createPost = async (postData: CreatePostInput): Promise<Post> => {
     const createdPost = data.data || data.post || data;
     toast.success('Post published successfully');
     return createdPost as Post;
-  } catch (error: any) {
-    const msg = error.response?.data?.message || error.message || 'Failed to create post';
+  } catch (error: unknown) {
+    let msg = 'Failed to create post';
+    if (axios.isAxiosError(error)) {
+      msg = error.response?.data?.message || error.message || msg;
+    } else if (error instanceof Error) {
+      msg = error.message;
+    }
     toast.error(msg);
     throw error;
   }
@@ -94,7 +118,7 @@ export const createPost = async (postData: CreatePostInput): Promise<Post> => {
 
 export const updatePost = async (id: string | number, postData: Partial<CreatePostInput>): Promise<Post> => {
   try {
-    const body: Record<string, any> = {};
+    const body: Record<string, unknown> = {};
     if (postData.title !== undefined) body.title = postData.title;
     if (postData.description !== undefined) body.description = postData.description;
     if (postData.categoryId !== undefined) body.categoryId = postData.categoryId;
@@ -105,8 +129,11 @@ export const updatePost = async (id: string | number, postData: Partial<CreatePo
     const updated = data.data || data.post || data;
     toast.success('Post updated successfully');
     return updated as Post;
-  } catch (error: any) {
-    const msg = error.response?.data?.message || 'Failed to update post';
+  } catch (error: unknown) {
+    let msg = 'Failed to update post';
+    if (axios.isAxiosError(error)) {
+      msg = error.response?.data?.message || error.message || msg;
+    }
     toast.error(msg);
     throw error;
   }
@@ -117,8 +144,11 @@ export const deletePost = async (id: string | number): Promise<boolean> => {
     await apiClient.delete(`/posts/${id}`);
     toast.success('Post deleted successfully');
     return true;
-  } catch (error: any) {
-    const msg = error.response?.data?.message || 'Failed to delete post';
+  } catch (error: unknown) {
+    let msg = 'Failed to delete post';
+    if (axios.isAxiosError(error)) {
+      msg = error.response?.data?.message || error.message || msg;
+    }
     toast.error(msg);
     return false;
   }

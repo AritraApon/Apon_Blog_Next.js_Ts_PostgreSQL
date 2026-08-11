@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FiArrowLeft, FiEdit3, FiUsers, FiMessageSquare, FiTrendingUp, FiHeart } from 'react-icons/fi';
 import { HiSparkles } from 'react-icons/hi2';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const VALUES = [
   {
@@ -70,6 +71,7 @@ export default function AboutPage() {
             <span className="text-base font-bold text-white">AponVerse</span>
           </Link>
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             <Link href="/contact" className="text-sm text-slate-400 hover:text-white transition-colors">Contact</Link>
             <Link href="/login" className="text-sm font-semibold px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl transition-colors">
               Get Started

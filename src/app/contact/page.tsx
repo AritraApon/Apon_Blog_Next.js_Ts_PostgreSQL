@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { FiArrowLeft, FiMail, FiGithub, FiSend, FiMapPin, FiClock } from 'react-icons/fi';
 import { HiSparkles } from 'react-icons/hi2';
 import { toast } from 'react-toastify';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const FAQ = [
   {
@@ -50,18 +51,19 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen av-bg av-text">
       {/* Navigation */}
-      <nav className="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/60">
+      <nav className="sticky top-0 z-40 av-nav backdrop-blur-xl border-b border-slate-800/60">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
             <span className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shadow-md shadow-indigo-600/40 group-hover:shadow-indigo-600/60 transition-shadow">
               <HiSparkles className="w-4 h-4 text-white" />
             </span>
-            <span className="text-base font-bold text-white">AponVerse</span>
+            <span className="text-base font-bold av-text">AponVerse</span>
           </Link>
           <div className="flex items-center gap-4">
-            <Link href="/about" className="text-sm text-slate-400 hover:text-white transition-colors">About</Link>
+            <ThemeToggle />
+            <Link href="/about" className="text-sm text-slate-400 hover:text-indigo-400 transition-colors">About</Link>
             <Link href="/login" className="text-sm font-semibold px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl transition-colors">
               Sign In
             </Link>

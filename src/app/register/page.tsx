@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { FiUser, FiMail, FiLock, FiUserPlus, FiEye, FiEyeOff } from 'react-icons/fi';
 import { HiSparkles } from 'react-icons/hi2';
 import { useAuth } from '@/lib/authContext';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const BENEFITS = [
   { icon: '🖊️', text: 'Create unlimited posts with rich images' },
@@ -63,7 +64,12 @@ export default function RegisterPage() {
   const strengthLabels = ['', 'Weak', 'Good', 'Strong'];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex">
+    <div className="min-h-screen av-bg av-text flex relative">
+      {/* Theme toggle */}
+      <div className="absolute top-4 right-4 z-50">
+        <ThemeToggle />
+      </div>
+
       {/* Left panel — branding */}
       <div className="hidden lg:flex flex-col justify-between w-1/2 bg-gradient-to-br from-violet-950 via-slate-900 to-slate-950 p-12 border-r border-slate-800/60">
         <Link href="/" className="flex items-center gap-2 group">
@@ -127,11 +133,11 @@ export default function RegisterPage() {
             <span className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
               <HiSparkles className="w-4 h-4 text-white" />
             </span>
-            <span className="text-lg font-bold text-white">AponVerse</span>
+            <span className="text-lg font-bold av-text">AponVerse</span>
           </div>
 
           <div className="mb-8">
-            <h1 className="text-3xl font-black text-white tracking-tight">Create account</h1>
+            <h1 className="text-3xl font-black av-text tracking-tight">Create account</h1>
             <p className="text-slate-400 text-sm mt-1.5">Join AponVerse and start sharing your stories</p>
           </div>
 
@@ -152,7 +158,7 @@ export default function RegisterPage() {
                   value={name}
                   onChange={(e) => { setName(e.target.value); if (errors.name) setErrors(p => ({ ...p, name: undefined })); }}
                   placeholder="John Doe"
-                  className={`w-full pl-10 pr-4 py-3.5 bg-slate-900 border ${errors.name ? 'border-rose-500' : 'border-slate-800'} rounded-xl text-white placeholder-slate-600 focus:outline-none focus:ring-2 ${errors.name ? 'focus:ring-rose-500' : 'focus:ring-indigo-500'} focus:border-transparent transition-all text-sm`}
+                  className={`w-full pl-10 pr-4 py-3.5 av-input border ${errors.name ? 'border-rose-500' : 'border-slate-800'} rounded-xl placeholder-slate-500 focus:outline-none focus:ring-2 ${errors.name ? 'focus:ring-rose-500' : 'focus:ring-indigo-500'} transition-all text-sm`}
                 />
               </div>
               {errors.name && <p className="text-rose-400 text-xs mt-1.5 ml-1">{errors.name}</p>}
@@ -174,7 +180,7 @@ export default function RegisterPage() {
                   value={email}
                   onChange={(e) => { setEmail(e.target.value); if (errors.email) setErrors(p => ({ ...p, email: undefined })); }}
                   placeholder="you@example.com"
-                  className={`w-full pl-10 pr-4 py-3.5 bg-slate-900 border ${errors.email ? 'border-rose-500' : 'border-slate-800'} rounded-xl text-white placeholder-slate-600 focus:outline-none focus:ring-2 ${errors.email ? 'focus:ring-rose-500' : 'focus:ring-indigo-500'} focus:border-transparent transition-all text-sm`}
+                  className={`w-full pl-10 pr-4 py-3.5 av-input border ${errors.email ? 'border-rose-500' : 'border-slate-800'} rounded-xl placeholder-slate-500 focus:outline-none focus:ring-2 ${errors.email ? 'focus:ring-rose-500' : 'focus:ring-indigo-500'} transition-all text-sm`}
                 />
               </div>
               {errors.email && <p className="text-rose-400 text-xs mt-1.5 ml-1">{errors.email}</p>}
@@ -196,7 +202,7 @@ export default function RegisterPage() {
                   value={password}
                   onChange={(e) => { setPassword(e.target.value); if (errors.password) setErrors(p => ({ ...p, password: undefined })); }}
                   placeholder="••••••••"
-                  className={`w-full pl-10 pr-12 py-3.5 bg-slate-900 border ${errors.password ? 'border-rose-500' : 'border-slate-800'} rounded-xl text-white placeholder-slate-600 focus:outline-none focus:ring-2 ${errors.password ? 'focus:ring-rose-500' : 'focus:ring-indigo-500'} focus:border-transparent transition-all text-sm`}
+                  className={`w-full pl-10 pr-12 py-3.5 av-input border ${errors.password ? 'border-rose-500' : 'border-slate-800'} rounded-xl placeholder-slate-500 focus:outline-none focus:ring-2 ${errors.password ? 'focus:ring-rose-500' : 'focus:ring-indigo-500'} transition-all text-sm`}
                 />
                 <button
                   type="button"
@@ -240,17 +246,17 @@ export default function RegisterPage() {
             </motion.button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-slate-500">
+          <p className="mt-6 text-center text-sm text-slate-400">
             Already have an account?{' '}
             <Link href="/login" className="text-indigo-400 hover:text-indigo-300 font-semibold transition-colors">
               Sign in
             </Link>
           </p>
 
-          <div className="mt-8 flex justify-center gap-4 text-xs text-slate-600 lg:hidden">
-            <Link href="/about" className="hover:text-slate-400 transition-colors">About</Link>
-            <Link href="/contact" className="hover:text-slate-400 transition-colors">Contact</Link>
-            <Link href="/dashboard" className="hover:text-slate-400 transition-colors">Explore</Link>
+          <div className="mt-8 flex justify-center gap-4 text-xs text-slate-400 lg:hidden">
+            <Link href="/about" className="hover:text-slate-200 transition-colors">About</Link>
+            <Link href="/contact" className="hover:text-slate-200 transition-colors">Contact</Link>
+            <Link href="/dashboard" className="hover:text-slate-200 transition-colors">Explore</Link>
           </div>
         </motion.div>
       </div>

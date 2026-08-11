@@ -28,7 +28,7 @@ apiClient.interceptors.request.use(
 // Response interceptor to handle global errors (e.g., 401 Unauthorized)
 apiClient.interceptors.response.use(
   (response) => response,
-  (error: AxiosError<any>) => {
+  (error: AxiosError<{ message?: string }>) => {
     if (typeof window !== 'undefined' && error.response?.status === 401) {
       localStorage.removeItem('authToken');
       localStorage.removeItem('authUser');
@@ -59,8 +59,13 @@ export const uploadImageToImgBB = async (file: File): Promise<string> => {
       throw new Error('Failed to get image URL from ImgBB');
     }
     return imageUrl;
-  } catch (err: any) {
-    const msg = err?.response?.data?.error?.message || err.message || 'Image upload failed';
+  } catch (err: unknown) {
+    let msg = 'Image upload failed';
+    if (axios.isAxiosError(err)) {
+      msg = err.response?.data?.error?.message || err.message || msg;
+    } else if (err instanceof Error) {
+      msg = err.message;
+    }
     toast.error(`ImgBB Upload Error: ${msg}`);
     throw new Error(msg);
   }

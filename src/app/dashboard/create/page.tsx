@@ -8,7 +8,6 @@ import {
   FiTag,
   FiFileText,
   FiArrowLeft,
-  FiImage,
   FiTrash2,
   FiUploadCloud,
 } from 'react-icons/fi';
@@ -55,13 +54,11 @@ export default function CreatePostPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate type
     if (!file.type.startsWith('image/')) {
       toast.error('Please select a valid image file (PNG, JPG, WEBP, GIF)');
       return;
     }
 
-    // Validate size (max 5MB)
     const MAX_SIZE = 5 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
       toast.error('Image size must be less than 5MB');
@@ -89,19 +86,16 @@ export default function CreatePostPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Step 1: Validate title
     if (!title.trim()) {
       toast.error('Please enter a post title');
       return;
     }
 
-    // Step 2: Validate description
     if (!description.trim()) {
       toast.error('Please enter post description / content');
       return;
     }
 
-    // Step 3: Validate category
     if (!categoryId) {
       toast.error('Please select a category');
       return;
@@ -112,13 +106,11 @@ export default function CreatePostPage() {
     try {
       let uploadedImageUrl: string | undefined = undefined;
 
-      // Step 4 & 5: Upload image to ImgBB if selected
       if (imageFile) {
         toast.info('Uploading image to ImgBB...');
         uploadedImageUrl = await uploadImageToImgBB(imageFile);
       }
 
-      // Step 6: Create post API
       await createPost({
         title: title.trim(),
         description: description.trim(),
@@ -126,10 +118,8 @@ export default function CreatePostPage() {
         image: uploadedImageUrl,
       });
 
-      // Step 8: Success
       router.push('/dashboard/my-posts');
-    } catch (err: any) {
-      // Error handling
+    } catch (err: unknown) {
       console.error('Post creation failed', err);
     } finally {
       setIsSubmitting(false);
@@ -150,14 +140,14 @@ export default function CreatePostPage() {
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl space-y-6"
+        className="av-card border border-slate-800/80 rounded-2xl p-6 sm:p-8 shadow-xl space-y-6"
       >
-        <div className="flex items-center gap-3 border-b border-slate-800 pb-5">
-          <div className="p-3 bg-indigo-600/20 text-indigo-400 rounded-xl">
+        <div className="flex items-center gap-3 border-b border-slate-800/60 pb-5">
+          <div className="p-3 bg-indigo-600/20 text-indigo-500 rounded-xl">
             <FiPlusCircle className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-white">Create New Post</h1>
+            <h1 className="text-xl font-bold av-text">Create New Post</h1>
             <p className="text-xs text-slate-400">Publish your story or tutorial</p>
           </div>
         </div>
@@ -178,7 +168,7 @@ export default function CreatePostPage() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Enter an engaging title..."
-                className="w-full pl-11 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                className="w-full pl-11 pr-4 py-3 av-input border border-slate-800 rounded-xl placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
               />
             </div>
           </div>
@@ -197,7 +187,7 @@ export default function CreatePostPage() {
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
                 disabled={loadingCategories}
-                className="w-full pl-11 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all disabled:opacity-50"
+                className="w-full pl-11 pr-4 py-3 av-input border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all disabled:opacity-50 appearance-none"
               >
                 <option value="">Select category</option>
                 {categories.map((cat) => (
@@ -232,9 +222,9 @@ export default function CreatePostPage() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full border-2 border-dashed border-slate-800 hover:border-indigo-500/50 rounded-xl p-6 flex flex-col items-center justify-center text-slate-400 hover:text-slate-200 transition-all bg-slate-950/50 group"
+                className="w-full border-2 border-dashed border-slate-800 hover:border-indigo-500/50 rounded-xl p-6 flex flex-col items-center justify-center text-slate-400 hover:text-slate-200 transition-all bg-slate-950/20 group"
               >
-                <div className="p-3 bg-slate-900 rounded-full group-hover:bg-indigo-600/20 group-hover:text-indigo-400 mb-2 transition-colors">
+                <div className="p-3 bg-slate-800/40 rounded-full group-hover:bg-indigo-600/20 group-hover:text-indigo-400 mb-2 transition-colors">
                   <FiUploadCloud className="w-6 h-6" />
                 </div>
                 <span className="text-xs font-semibold text-slate-300">Click to upload image</span>
@@ -246,7 +236,7 @@ export default function CreatePostPage() {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  className="relative rounded-xl overflow-hidden border border-slate-800 bg-slate-950 p-2"
+                  className="relative rounded-xl overflow-hidden border border-slate-800 p-2"
                 >
                   <img
                     src={imagePreviewUrl}
@@ -279,12 +269,12 @@ export default function CreatePostPage() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Write your detailed blog post content..."
-              className="w-full p-4 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-y"
+              className="w-full p-4 av-input border border-slate-800 rounded-xl placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all resize-y"
             ></textarea>
           </div>
 
           {/* Submit Buttons */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800/60">
             <Link
               href="/dashboard"
               className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-colors"

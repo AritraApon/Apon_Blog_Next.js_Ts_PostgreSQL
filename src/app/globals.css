@@ -1,10 +1,33 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
-:root {
+:root, [data-theme="dark"] {
   --background: #020617;
   --foreground: #f1f5f9;
+  --card-bg: #0f172a;
+  --card-border: #1e293b;
+  --card-border-hover: #4f46e5;
+  --input-bg: #020617;
+  --input-border: #1e293b;
+  --muted-text: #94a3b8;
+  --subtle-text: #64748b;
+  --nav-bg: #0f172a;
   --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card-bg: #ffffff;
+  --card-border: #e2e8f0;
+  --card-border-hover: #6366f1;
+  --input-bg: #ffffff;
+  --input-border: #cbd5e1;
+  --muted-text: #475569;
+  --subtle-text: #64748b;
+  --nav-bg: #ffffff;
+  color-scheme: light;
 }
 
 @theme inline {
@@ -18,11 +41,138 @@ html {
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Light / Dark utility helper classes */
+.av-bg {
+  background-color: var(--background);
+}
+
+.av-text {
+  color: var(--foreground);
+}
+
+.av-card {
+  background-color: var(--card-bg);
+  border-color: var(--card-border);
+}
+
+.av-nav {
+  background-color: var(--nav-bg);
+  border-color: var(--card-border);
+}
+
+.av-input {
+  background-color: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--foreground);
+}
+
+/* Detailed Light Mode theme mapping */
+[data-theme="light"] .av-card {
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+  color: #0f172a;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .av-nav {
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+}
+
+[data-theme="light"] .av-input {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+[data-theme="light"] .av-input::placeholder {
+  color: #94a3b8;
+}
+
+[data-theme="light"] select option {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+[data-theme="light"] .bg-slate-950 {
+  background-color: #f8fafc;
+}
+
+[data-theme="light"] .bg-slate-900 {
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+}
+
+[data-theme="light"] .bg-slate-800 {
+  background-color: #f1f5f9;
+  color: #1e293b;
+}
+
+[data-theme="light"] .bg-slate-800\/40,
+[data-theme="light"] .bg-slate-800\/50,
+[data-theme="light"] .bg-slate-800\/60 {
+  background-color: #f1f5f9;
+}
+
+[data-theme="light"] .bg-slate-950\/20,
+[data-theme="light"] .bg-slate-950\/40,
+[data-theme="light"] .bg-slate-950\/60 {
+  background-color: #f8fafc;
+}
+
+[data-theme="light"] .border-slate-800,
+[data-theme="light"] .border-slate-800\/60,
+[data-theme="light"] .border-slate-800\/80 {
+  border-color: #e2e8f0;
+}
+
+[data-theme="light"] .border-slate-700,
+[data-theme="light"] .border-slate-700\/60 {
+  border-color: #cbd5e1;
+}
+
+[data-theme="light"] .text-white {
+  color: #0f172a;
+}
+
+[data-theme="light"] .text-slate-100 {
+  color: #0f172a;
+}
+
+[data-theme="light"] .text-slate-200 {
+  color: #1e293b;
+}
+
+[data-theme="light"] .text-slate-300 {
+  color: #334155;
+}
+
+[data-theme="light"] .text-slate-400 {
+  color: #64748b;
+}
+
+[data-theme="light"] .text-slate-500 {
+  color: #64748b;
+}
+
+/* Preserve contrast for white text inside buttons */
+[data-theme="light"] .bg-indigo-600,
+[data-theme="light"] .bg-indigo-500,
+[data-theme="light"] .bg-rose-600,
+[data-theme="light"] .bg-rose-500,
+[data-theme="light"] .bg-indigo-600 *,
+[data-theme="light"] .bg-indigo-500 *,
+[data-theme="light"] .bg-rose-600 *,
+[data-theme="light"] .bg-rose-500 * {
+  color: #ffffff !important;
 }
 
 /* Scrollbar styling */
@@ -31,14 +181,14 @@ body {
   height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: var(--background);
 }
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: var(--card-border);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: var(--muted-text);
 }
 
 /* Hide scrollbar for horizontal scroll containers */
@@ -63,4 +213,3 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-
